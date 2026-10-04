@@ -203,7 +203,7 @@ function PrivacyPolicy({ onNavigate }: { onNavigate: (page: string) => void }) {
       <section className="relative pt-28 pb-20 px-6">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">Privacy Policy</h1>
-          <p className="text-zinc-500 text-sm mb-10">Last updated: June 2025</p>
+          <p className="text-zinc-500 text-sm mb-10">Last updated: 01-10-2026</p>
 
           <div className="space-y-8 text-zinc-300 text-sm leading-relaxed">
             <div>
