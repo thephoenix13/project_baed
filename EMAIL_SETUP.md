@@ -56,6 +56,6 @@ Vercel will automatically deploy the new API endpoint.
 
 ## Notes
 - The welcome email includes both HTML (styled) and plain text versions
-- The notification email is plain text with name, email, mobile, and ISO timestamp
+- The notification email is plain text with name, email, mobile, and IST timestamp
 - Reply-To is set on the notification email so you can reply directly to the user
 - All emails are sent from welcome@baed.site

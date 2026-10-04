@@ -29,7 +29,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Invalid mobile number' });
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      dateStyle: "medium",
+      timeStyle: "medium",
+    }) + " IST";
 
     // Email 1: Welcome email to the user
     const welcomeHtml = `
