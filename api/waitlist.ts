@@ -29,7 +29,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Invalid mobile number' });
     }
 
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      dateStyle: "medium",
+      timeStyle: "medium",
+    }) + " IST";
 
     // Email 1: Welcome email to the user
     const welcomeHtml = `
@@ -58,11 +62,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #374151;">
                 Hi ${name},
               </p>
-              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #374151;">
-                Thanks for joining the waitlist! We'll reach out before we launch.
-              </p>
               <p style="margin: 0 0 32px 0; font-size: 16px; line-height: 1.6; color: #374151;">
-                Meanwhile, say hi to <strong>Wingman</strong> — our free AI dating coach on WhatsApp.
+                Thanks for joining the waitlist! We'll reach out before we launch.
               </p>
               <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #374151;">
                 — Team Bae'd<br>
@@ -88,8 +89,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const welcomeText = `Hi ${name},
 
 Thanks for joining the waitlist! We'll reach out before we launch.
-
-Meanwhile, say hi to Wingman — our free AI dating coach on WhatsApp.
 
 — Team Bae'd
 Made in India 🇮🇳`;
