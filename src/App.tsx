@@ -31,7 +31,7 @@ function WaitlistForm({ onNavigate }: { onNavigate?: (page: string) => void } = 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setStatus("error");
@@ -49,9 +49,21 @@ function WaitlistForm({ onNavigate }: { onNavigate?: (page: string) => void } = 
       return;
     }
     setStatus("loading");
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, mobile: mobile.replace(/\s/g, "") }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Something went wrong");
+      }
       setStatus("success");
-    }, 1200);
+    } catch (err: unknown) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    }
   };
 
   if (status === "success") {
