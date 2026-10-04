@@ -316,7 +316,7 @@ function LandingPage({ onNavigate }: { onNavigate: (page: string) => void }) {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-zinc-400 text-xs mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-            India's first verified-first dating app
+            India's first verified-first and intent based dating app
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
