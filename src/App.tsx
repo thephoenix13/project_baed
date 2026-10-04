@@ -24,20 +24,31 @@ function useInView(threshold = 0.1) {
   return { ref, isInView };
 }
 
-function WaitlistForm() {
+function WaitlistForm({ onNavigate }: { onNavigate?: (page: string) => void } = {}) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      setStatus("error");
+      setErrorMsg("Please enter your name.");
+      return;
+    }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setStatus("error");
       setErrorMsg("Please enter a valid email address.");
       return;
     }
+    if (!mobile || !/^[0-9]{10}$/.test(mobile.replace(/\s/g, ""))) {
+      setStatus("error");
+      setErrorMsg("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     setStatus("loading");
-    // Simulate API call
     setTimeout(() => {
       setStatus("success");
     }, 1200);
@@ -53,11 +64,7 @@ function WaitlistForm() {
         </div>
         <h3 className="text-xl font-semibold text-white mb-2">You're on the list!</h3>
         <p className="text-zinc-400 text-sm">
-          We'll reach out before launch. Meanwhile, try{" "}
-          <a href="https://baed.site/wingman.html" className="text-rose-400 hover:text-rose-300 transition-colors">
-            Wingman
-          </a>{" "}
-          — our free AI dating coach.
+          We'll reach out before launch. Stay tuned.
         </p>
       </div>
     );
@@ -65,26 +72,44 @@ function WaitlistForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (status === "error") setStatus("idle");
-            }}
-            placeholder="Your email address"
-            className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/20 transition-all text-sm"
-          />
-        </div>
+      <div className="flex flex-col gap-3">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (status === "error") setStatus("idle");
+          }}
+          placeholder="Your name"
+          className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/20 transition-all text-sm"
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (status === "error") setStatus("idle");
+          }}
+          placeholder="Email address"
+          className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/20 transition-all text-sm"
+        />
+        <input
+          type="tel"
+          value={mobile}
+          onChange={(e) => {
+            setMobile(e.target.value);
+            if (status === "error") setStatus("idle");
+          }}
+          placeholder="Mobile number"
+          className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/20 transition-all text-sm"
+        />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="px-6 py-3.5 bg-rose-500 hover:bg-rose-400 disabled:bg-rose-500/70 text-white font-medium rounded-xl transition-all duration-200 text-sm whitespace-nowrap hover:shadow-lg hover:shadow-rose-500/20 active:scale-[0.98]"
+          className="w-full px-6 py-3.5 bg-rose-500 hover:bg-rose-400 disabled:bg-rose-500/70 text-white font-medium rounded-xl transition-all duration-200 text-sm hover:shadow-lg hover:shadow-rose-500/20 active:scale-[0.98]"
         >
           {status === "loading" ? (
-            <span className="flex items-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -92,20 +117,27 @@ function WaitlistForm() {
               Joining...
             </span>
           ) : (
-            "Join"
+            "Join the waitlist"
           )}
         </button>
       </div>
       {status === "error" && (
         <p className="text-red-400 text-xs mt-2 animate-fade-in">{errorMsg}</p>
       )}
-      <p className="text-zinc-500 text-xs mt-3">No spam. We'll notify you before launch.</p>
+      <p className="text-zinc-500 text-xs mt-3 text-center">
+        No spam. We'll notify you before launch.{" "}
+        {onNavigate && (
+          <span className="underline cursor-pointer hover:text-zinc-400 transition-colors" onClick={() => onNavigate("privacy")}>
+            Privacy Policy
+          </span>
+        )}
+      </p>
     </form>
   );
 }
 
-function ProfileCard({ name, age, city, role, match, interests, delay }: {
-  name: string; age: number; city: string; role: string; match: number; interests: string; delay: number;
+function ProfileCard({ name, age, city, role, intent, interests, delay }: {
+  name: string; age: number; city: string; role: string; intent: number; interests: string; delay: number;
 }) {
   const { ref, isInView } = useInView();
   const initials = name.charAt(0);
@@ -137,27 +169,120 @@ function ProfileCard({ name, age, city, role, match, interests, delay }: {
       </div>
       <div className="flex items-center justify-between">
         <span className="text-zinc-400 text-xs">{interests}</span>
-        <span className="text-rose-400 text-xs font-medium">{match}% match</span>
+        <span className="text-rose-400 text-xs font-medium">{intent}% intent</span>
       </div>
     </div>
   );
 }
 
-export default function App() {
-  const [count, setCount] = useState(247);
+function PrivacyPolicy({ onNavigate }: { onNavigate: (page: string) => void }) {
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-rose-500/[0.03] rounded-full blur-[120px]" />
+      </div>
+
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-white/[0.04]">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <button onClick={() => onNavigate("home")} className="text-lg font-bold tracking-tight cursor-pointer">
+            <span className="text-white">Bae</span>
+            <span className="text-rose-400">'d</span>
+          </button>
+          <button
+            onClick={() => onNavigate("home")}
+            className="text-xs text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+        </div>
+      </nav>
+
+      <section className="relative pt-28 pb-20 px-6">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">Privacy Policy</h1>
+          <p className="text-zinc-500 text-sm mb-10">Last updated: June 2025</p>
+
+          <div className="space-y-8 text-zinc-300 text-sm leading-relaxed">
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">Overview</h2>
+              <p>
+                Bae'd respects your privacy. This policy explains what information we collect when you join our waitlist and how we use it.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">Information We Collect</h2>
+              <p>When you join the waitlist, we collect:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1 text-zinc-400">
+                <li>Your name</li>
+                <li>Your email address</li>
+                <li>Your mobile number</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">How We Use Your Information</h2>
+              <p className="text-rose-300 font-medium">
+                Your email address and mobile number will <span className="underline">only</span> be used for communication from the Bae'd app.
+              </p>
+              <p className="mt-2 text-zinc-400">
+                This includes:
+              </p>
+              <ul className="list-disc list-inside mt-2 space-y-1 text-zinc-400">
+                <li>Notifying you when Bae'd launches</li>
+                <li>Sending you updates about the app</li>
+                <li>Communicating important information related to your account</li>
+              </ul>
+              <p className="mt-3 text-zinc-400">
+                We will <span className="text-white font-medium">never</span> sell, share, or use your email or mobile number for any purpose other than direct communication from Bae'd. Your data is not shared with third parties, advertisers, or any external services.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">Data Security</h2>
+              <p>
+                We take reasonable measures to protect your personal information from unauthorized access, alteration, or destruction.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">Your Rights</h2>
+              <p>
+                You may request deletion of your data at any time by contacting us. We will remove your information promptly.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">Changes to This Policy</h2>
+              <p>
+                We may update this policy from time to time. Any changes will be reflected on this page.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="text-white font-semibold text-base mb-2">Contact</h2>
+              <p>
+                For any privacy-related questions, reach out to us through the app once it launches.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function LandingPage({ onNavigate }: { onNavigate: (page: string) => void }) {
+  const [count] = useState(32);
   const heroRef = useInView(0.1);
   const featuresRef = useInView(0.1);
   const profilesRef = useInView(0.1);
   const howItWorksRef = useInView(0.1);
   const wingmanRef = useInView(0.1);
-
-  useEffect(() => {
-    // Slowly increment count for social proof
-    const interval = setInterval(() => {
-      setCount((c) => (c < 312 ? c + 1 : c));
-    }, 15000);
-    return () => clearInterval(interval);
-  }, []);
+  const curatedRef = useInView(0.1);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white overflow-hidden">
@@ -170,22 +295,14 @@ export default function App() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-white/[0.04]">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <a href="https://baed.site/" className="text-lg font-bold tracking-tight">
+          <div className="text-lg font-bold tracking-tight">
             <span className="text-white">Bae</span>
             <span className="text-rose-400">'d</span>
-          </a>
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {count}+ waiting
-            </span>
-            <a
-              href="https://baed.site/wingman.html"
-              className="text-xs text-zinc-400 hover:text-white transition-colors"
-            >
-              Wingman →
-            </a>
           </div>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            {count}+ waiting
+          </span>
         </div>
       </nav>
 
@@ -218,12 +335,39 @@ export default function App() {
             Every profile is ID-verified before they can match. Real people. Real intent. Built for India.
           </p>
 
-          <WaitlistForm />
+          <WaitlistForm onNavigate={onNavigate} />
+        </div>
+      </section>
+
+      {/* Curated Profiles Section */}
+      <section className="relative py-16 px-6">
+        <div
+          ref={curatedRef.ref}
+          className={`max-w-2xl mx-auto transition-all duration-1000 ${
+            curatedRef.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
+          <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-rose-500/[0.06] to-purple-500/[0.03] border border-rose-500/[0.08] overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-rose-500/5 rounded-full blur-3xl" />
+            <div className="relative text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-rose-500/10 mb-4">
+                <svg className="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                Selective, curated profiles — <span className="text-zinc-400">not a sea of strangers.</span>
+              </h3>
+              <p className="text-zinc-400 text-sm leading-relaxed max-w-md mx-auto">
+                Unlike other apps that throw everyone at you, Bae'd handpicks profiles curated specifically for you. Every person you see has better intent, verified identity, and a genuine desire to connect.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="relative py-20 px-6">
+      <section className="relative py-16 px-6">
         <div
           ref={featuresRef.ref}
           className={`max-w-4xl mx-auto transition-all duration-1000 delay-200 ${
@@ -276,7 +420,7 @@ export default function App() {
       </section>
 
       {/* How it works */}
-      <section className="relative py-20 px-6">
+      <section className="relative py-16 px-6">
         <div
           ref={howItWorksRef.ref}
           className={`max-w-3xl mx-auto transition-all duration-1000 ${
@@ -300,7 +444,7 @@ export default function App() {
               {
                 step: "02",
                 title: "Verify your ID",
-                desc: "Quick ID check via Aadhaar or DigiLocker. Takes under 2 minutes. Your data is never stored.",
+                desc: "Quick government ID verification. Takes under 2 minutes. Your data is never stored or shared.",
               },
               {
                 step: "03",
@@ -326,7 +470,7 @@ export default function App() {
       </section>
 
       {/* Verified Profiles */}
-      <section className="relative py-20 px-6">
+      <section className="relative py-16 px-6">
         <div
           ref={profilesRef.ref}
           className={`max-w-4xl mx-auto transition-all duration-1000 ${
@@ -341,15 +485,15 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <ProfileCard name="Riya" age={27} city="Mumbai" role="UX Designer" match={91} interests="Hikes · Coffee · Books" delay={0} />
-            <ProfileCard name="Arjun" age={29} city="Pune" role="Software Engineer" match={87} interests="Cycling · Films · Travel" delay={150} />
-            <ProfileCard name="Priya" age={26} city="Bengaluru" role="Marketing Lead" match={94} interests="Running · Food · Music" delay={300} />
+            <ProfileCard name="Riya" age={27} city="Mumbai" role="UX Designer" intent={91} interests="Hikes · Coffee · Books" delay={0} />
+            <ProfileCard name="Arjun" age={29} city="Pune" role="Software Engineer" intent={87} interests="Cycling · Films · Travel" delay={150} />
+            <ProfileCard name="Priya" age={26} city="Bengaluru" role="Marketing Lead" intent={94} interests="Running · Food · Music" delay={300} />
           </div>
         </div>
       </section>
 
-      {/* Wingman CTA */}
-      <section className="relative py-20 px-6">
+      {/* Wingman CTA - Updated */}
+      <section className="relative py-16 px-6">
         <div
           ref={wingmanRef.ref}
           className={`max-w-2xl mx-auto transition-all duration-1000 ${
@@ -361,18 +505,17 @@ export default function App() {
             <div className="relative">
               <span className="text-3xl mb-4 block">🪽</span>
               <h3 className="text-xl font-bold text-white mb-2">While you wait, try Wingman</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-5">
-                Our free AI dating coach on WhatsApp. Opens convos, reads signals, preps you for dates — works on any app.
+              <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+                Our free AI dating coach. Opens convos, reads signals, preps you for dates — works on any app.
               </p>
-              <a
-                href="https://baed.site/wingman.html"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm text-white transition-all"
-              >
-                Learn more
+              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/10 text-amber-300 text-xs">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-              </a>
+                <span>
+                  <strong className="text-amber-200">October 30th</strong> — live for the first few on the waitlist, then by invite only.
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -388,7 +531,7 @@ export default function App() {
           <p className="text-zinc-400 text-sm mb-8 max-w-md mx-auto">
             Be among the first to access Bae'd when we launch. No spam, just a heads-up before doors open.
           </p>
-          <WaitlistForm />
+          <WaitlistForm onNavigate={onNavigate} />
         </div>
       </section>
 
@@ -402,12 +545,24 @@ export default function App() {
             </span>
             <span className="text-zinc-600 text-xs">· Dating, without the doubt.</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-zinc-500">
-            <a href="https://baed.site/" className="hover:text-white transition-colors">Home</a>
-            <a href="https://baed.site/wingman.html" className="hover:text-white transition-colors">Wingman</a>
-          </div>
+          <button
+            onClick={() => onNavigate("privacy")}
+            className="text-xs text-zinc-500 hover:text-white transition-colors cursor-pointer"
+          >
+            Privacy Policy
+          </button>
         </div>
       </footer>
     </div>
   );
+}
+
+export default function App() {
+  const [page, setPage] = useState("home");
+
+  if (page === "privacy") {
+    return <PrivacyPolicy onNavigate={setPage} />;
+  }
+
+  return <LandingPage onNavigate={setPage} />;
 }
